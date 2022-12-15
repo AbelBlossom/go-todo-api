@@ -36,7 +36,7 @@ func GenerateToken(user *models.User) (string, error) {
 	claims := JWTClaims{}
 	claims.ID = user.ID
 	claims.Email = user.Email
-	claims.ExpiresAt = time.Now().Add(30 * time.Minute).Unix()
+	claims.ExpiresAt = time.Now().Add(60 * time.Minute).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	if hash, err := token.SignedString(secretKey); err == nil {

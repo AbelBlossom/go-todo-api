@@ -14,13 +14,20 @@ func CreateUser(c *gin.Context) {
 
 	user := models.User{}
 
-	if err := c.ShouldBind(&user); err == nil {
-		db.DB.Create(&user)
-	} else {
-		panic(err)
+	err := c.ShouldBind(&user)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"error": "Invalid Content"})
+		return
 	}
+	var userCount int64
+	db.DB.First(&models.User{}, "email = ?", user.Email).Count(&userCount)
+	if userCount > 0 {
+		c.AbortWithStatusJSON(400, gin.H{"error": "User Already Exists"})
+		return
+	}
+	db.DB.Create(&user)
 
-	c.JSON(200, gin.H{"user": user})
+	c.AbortWithStatusJSON(200, gin.H{"user": user})
 }
 
 func Login(c *gin.Context) {
@@ -35,20 +42,17 @@ func Login(c *gin.Context) {
 		if user.ID != 0 {
 			if user.ComparePassword(details.Password) {
 				if token, err := auth.GenerateToken(&user); err == nil {
-					c.JSON(200, gin.H{"token": token})
-					c.Abort()
+					c.AbortWithStatusJSON(200, gin.H{"token": token})
 					return
 				} else {
 					fmt.Println(err)
 				}
 			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Wrong Password"})
-				c.Abort()
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Wrong Password"})
 				return
 			}
 		}
 	}
-	c.JSON(http.StatusBadGateway, gin.H{"error": "failed"})
-	c.Abort()
+	c.AbortWithStatusJSON(http.StatusBadGateway, gin.H{"error": "failed"})
 
 }
