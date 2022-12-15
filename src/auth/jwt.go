@@ -6,6 +6,7 @@ import (
 
 	"github.com/abelblossom/todo/src/db"
 	"github.com/abelblossom/todo/src/models"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -62,4 +63,9 @@ func DecodeToken(token string) (*JWTClaims, error) {
 		return &JWTClaims{}, err
 	}
 
+}
+
+func GetClaims(c *gin.Context) *JWTClaims {
+	val, _ := c.Get("claims")
+	return val.(*JWTClaims)
 }
