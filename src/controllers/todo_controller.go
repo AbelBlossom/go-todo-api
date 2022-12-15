@@ -17,7 +17,7 @@ func ListTodo(c *gin.Context) {
 
 	var todos []models.Todo
 
-	db.DB.Model(&models.Todo{UserID: claims.ID}).Find(&todos)
+	db.DB.Model(&models.Todo{}).Find(&todos, "user_id == ?", claims.ID)
 
 	c.AbortWithStatusJSON(200, gin.H{"data": todos})
 }
